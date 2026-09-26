@@ -1,0 +1,52 @@
+{
+  "name": "@drumee/window-manager",
+  "version": "0.1.0-alpha.1",
+  "description": "Standalone MFS-independent Drumee multi-window UI capability.",
+  "license": "AGPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/drumee/window-manager.git"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "next",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./browser": "./lib/browser.js",
+    "./skin.css": "./skin/window-manager.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/",
+    "skin/",
+    "PROVENANCE.md",
+    "README.md"
+  ],
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "jquery": "3.7.1",
+    "jquery-ui": "1.14.2"
+  },
+  "peerDependencies": {
+    "@drumee/ui-runtime": ">=0.1.0-alpha.1"
+  },
+  "peerDependenciesMeta": {
+    "@drumee/ui-runtime": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "css-loader": "6.11.0",
+    "style-loader": "3.3.4",
+    "webpack": "5.110.1"
+  }
+}

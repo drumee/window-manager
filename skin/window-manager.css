@@ -1,0 +1,95 @@
+.drumee-window-manager {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.drumee-window {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow: visible;
+  border: 1px solid #8a93a3;
+  border-radius: 8px;
+  background: #fff;
+  color: #202735;
+  box-shadow: 0 8px 28px rgba(16, 24, 40, .2);
+}
+
+.drumee-window[data-state="active"] {
+  border-color: #3878d8;
+  box-shadow: 0 12px 34px rgba(16, 24, 40, .32);
+}
+
+.drumee-window__header {
+  display: flex;
+  flex: 0 0 38px;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 0 8px 0 12px;
+  border-radius: 7px 7px 0 0;
+  background: #e9edf4;
+  cursor: move;
+  user-select: none;
+  touch-action: none;
+}
+
+.drumee-window__title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.drumee-window__controls {
+  display: flex;
+  gap: 4px;
+}
+
+.drumee-window__controls button {
+  width: 25px;
+  height: 25px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.drumee-window__body {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 12px;
+}
+
+.drumee-window[data-drop_state="over"] {
+  outline: 3px solid #3b82f6;
+  outline-offset: -4px;
+}
+
+.drumee-window > .ui-resizable-handle {
+  position: absolute;
+  z-index: 4;
+  display: block;
+}
+
+.drumee-window > .ui-resizable-n,
+.drumee-window > .ui-resizable-s { left: 8px; right: 8px; height: 9px; }
+.drumee-window > .ui-resizable-e,
+.drumee-window > .ui-resizable-w { top: 8px; bottom: 8px; width: 9px; }
+.drumee-window > .ui-resizable-n { top: -4px; cursor: n-resize; }
+.drumee-window > .ui-resizable-s { bottom: -4px; cursor: s-resize; }
+.drumee-window > .ui-resizable-e { right: -4px; cursor: e-resize; }
+.drumee-window > .ui-resizable-w { left: -4px; cursor: w-resize; }
+.drumee-window > .ui-resizable-se,
+.drumee-window > .ui-resizable-sw,
+.drumee-window > .ui-resizable-ne,
+.drumee-window > .ui-resizable-nw { width: 16px; height: 16px; }
+.drumee-window > .ui-resizable-se { right: -5px; bottom: -5px; cursor: se-resize; }
+.drumee-window > .ui-resizable-sw { left: -5px; bottom: -5px; cursor: sw-resize; }
+.drumee-window > .ui-resizable-ne { right: -5px; top: -5px; cursor: ne-resize; }
+.drumee-window > .ui-resizable-nw { left: -5px; top: -5px; cursor: nw-resize; }
