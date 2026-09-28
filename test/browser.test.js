@@ -69,15 +69,20 @@ function compile(output_path, consumer) {
   }));
 }
 
-async function endpoint(port) {
-  for (let attempt = 0; attempt < 100; attempt++) {
+async function endpoint(profile, child, diagnostics) {
+  const port_file = path.join(profile, "DevToolsActivePort");
+  for (let attempt = 0; attempt < 300; attempt++) {
+    if (child.exitCode != null || child.signalCode != null) {
+      throw new Error(`Chromium exited before DevTools became ready (${child.exitCode || child.signalCode})\n${diagnostics.join("")}`);
+    }
     try {
+      const port = Number(fs.readFileSync(port_file, "utf8").split(/\r?\n/, 1)[0]);
       const response = await fetch(`http://127.0.0.1:${port}/json/list`);
       if (response.ok) return (await response.json()).find((entry) => entry.type === "page");
     } catch (_) {}
     await new Promise((resolve) => setTimeout(resolve, 50));
   }
-  throw new Error("Chrome DevTools endpoint did not become ready");
+  throw new Error(`Chrome DevTools endpoint did not become ready\n${diagnostics.join("")}`);
 }
 
 function devtools(url) {
@@ -149,12 +154,18 @@ test("real browser provides independent multi-window drag, resize, generic drop 
   const consumer = packedConsumer(consumer_work);
   await compile(output_path, consumer);
   fs.writeFileSync(path.join(output_path, "index.html"), `<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;width:100%;height:100%;overflow:hidden}#workspace{width:1000px;height:700px;background:#eef2f7}#workspace-two{position:absolute;left:1050px;top:0;width:100px;height:100px}#state-engine{position:absolute;left:1050px;top:120px}#token{position:absolute;left:20px;top:640px;width:52px;height:32px;background:#ef4444;z-index:9999}</style></head><body><main id="workspace"></main><aside id="workspace-two"></aside><aside id="state-engine"></aside><div id="token" class="generic-token">token</div><script>window.onerror=(m,s,l,c,e)=>document.body.dataset.error=String(e&&(e.stack||e.message)||m)</script><script src="window-manager.js"></script></body></html>`);
-  const port = 29470 + Math.floor(Math.random() * 100);
-  const process = child_process.spawn(chrome(), ["--headless=new", "--no-sandbox", "--disable-gpu", "--window-size=1200,800", `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`, "about:blank"], { stdio: "ignore" });
+  const diagnostics = [];
+  const process = child_process.spawn(chrome(), [
+    "--headless=new", "--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage",
+    "--no-first-run", "--no-default-browser-check", "--window-size=1200,800",
+    "--remote-debugging-address=127.0.0.1", "--remote-debugging-port=0",
+    `--user-data-dir=${profile}`, "about:blank"
+  ], { stdio: ["ignore", "ignore", "pipe"] });
+  process.stderr.on("data", (chunk) => diagnostics.push(String(chunk)));
   let protocol;
   let primary_error;
   try {
-    const page = await endpoint(port);
+    const page = await endpoint(profile, process, diagnostics);
     protocol = await devtools(page.webSocketDebuggerUrl);
     await protocol.send("Page.enable");
     await protocol.send("Runtime.enable");
