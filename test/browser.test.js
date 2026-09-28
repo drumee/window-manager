@@ -134,16 +134,22 @@ async function drag(protocol, from, to, steps = 8) {
 }
 
 async function terminate(child) {
-  if (child.exitCode != null || child.signalCode != null) return;
-  const exited = events.once(child, "exit");
-  child.kill("SIGTERM");
-  const graceful = await Promise.race([
-    exited.then(() => true),
-    new Promise((resolve) => setTimeout(() => resolve(false), 3000))
-  ]);
-  if (graceful || child.exitCode != null || child.signalCode != null) return;
-  child.kill("SIGKILL");
-  await events.once(child, "exit");
+  const groupAlive = () => {
+    try { process.kill(-child.pid, 0); return true; } catch (_) { return false; }
+  };
+  const signalGroup = (signal) => {
+    try { process.kill(-child.pid, signal); } catch (_) {
+      if (child.exitCode == null && child.signalCode == null) child.kill(signal);
+    }
+  };
+  const exited = child.exitCode == null && child.signalCode == null ? events.once(child, "exit") : Promise.resolve();
+  signalGroup("SIGTERM");
+  await Promise.race([exited, new Promise((resolve) => setTimeout(resolve, 3000))]);
+  if (groupAlive()) signalGroup("SIGKILL");
+  for (let attempt = 0; attempt < 100 && groupAlive(); attempt++) {
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  if (groupAlive()) throw new Error("Chromium process group did not terminate");
 }
 
 test("real browser provides independent multi-window drag, resize, generic drop and cleanup", { timeout: 90000 }, async (context) => {
@@ -160,7 +166,7 @@ test("real browser provides independent multi-window drag, resize, generic drop 
     "--no-first-run", "--no-default-browser-check", "--window-size=1200,800",
     "--remote-debugging-address=127.0.0.1", "--remote-debugging-port=0",
     `--user-data-dir=${profile}`, "about:blank"
-  ], { stdio: ["ignore", "ignore", "pipe"] });
+  ], { detached: true, stdio: ["ignore", "ignore", "pipe"] });
   process.stderr.on("data", (chunk) => diagnostics.push(String(chunk)));
   let protocol;
   let primary_error;
@@ -357,7 +363,10 @@ test("real browser provides independent multi-window drag, resize, generic drop 
     throw error;
   } finally {
     try {
-      if (protocol) protocol.close();
+      if (protocol) {
+        try { await protocol.send("Browser.close"); } catch (_) {}
+        protocol.close();
+      }
       await terminate(process);
       fs.rmSync(output_path, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
       fs.rmSync(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
