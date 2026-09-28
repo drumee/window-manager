@@ -17,7 +17,7 @@ const editor = manager.open({
   geometry: { left: 40, top: 30, width: 640, height: 420 },
   min_width: 360,
   min_height: 240,
-  content: editor_element,
+  content: runtime.Skeletons.Note("Editor ready"),
   droppable: {
     accept: ".application-token",
     tolerance: "pointer",
@@ -30,6 +30,10 @@ const editor = manager.open({
 });
 ```
 
+`content` accepts one LETC Skeleton descriptor or an array of descriptors and
+feeds them into the real `window-body` `LetcBox`. A native DOM node is retained
+only as an explicit interoperability escape hatch.
+
 `droppable: false` is the default. Drop callbacks receive generic DOM/jQuery UI
 context and an application-supplied payload; the manager assigns no business
 meaning to it.
@@ -41,6 +45,13 @@ Managers expose `create`, `open`, `register`, `get`, `windows`, `activate`,
 `close` and `destroy`. Managed windows expose `open`, `geometry`,
 `applyGeometry`, `on`, `minimize`, `restore`, `toggleMaximize`, `snap`, `close`
 and `destroy`.
+
+`ManagedWindow` is registered as the real LETC kind `managed_window`. Its shell
+is composed through canonical Skeleton factories; `window-handle`,
+`window-title`, `window-controls` and `window-body` are normal LETC parts, and
+control services route through `onUiEvent`. `getState()` is the exclusive
+manager-scoped radio selection (`1` or `0`); `lifecycle`/`window_status` owns
+the separate `created`, `open`, `minimized` and `closed` lifecycle.
 
 The `./browser` entry installs the package skin and exports the same API as
 `globalThis.DrumeeWindowManager`. A CSS-only consumer may import `./skin.css`.

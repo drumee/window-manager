@@ -17,7 +17,7 @@
   box-shadow: 0 8px 28px rgba(16, 24, 40, .2);
 }
 
-.drumee-window[data-state="active"] {
+.drumee-managed-window[data-state="1"][data-radio="on"] {
   border-color: #3878d8;
   box-shadow: 0 12px 34px rgba(16, 24, 40, .32);
 }
@@ -47,7 +47,7 @@
   gap: 4px;
 }
 
-.drumee-window__controls button {
+.drumee-window__control {
   width: 25px;
   height: 25px;
   padding: 0;

@@ -39,12 +39,8 @@
   "peerDependencies": {
     "@drumee/ui-runtime": ">=0.1.0-alpha.1"
   },
-  "peerDependenciesMeta": {
-    "@drumee/ui-runtime": {
-      "optional": true
-    }
-  },
   "devDependencies": {
+    "@drumee/ui-runtime": "https://github.com/drumee/ui-runtime/archive/c38962e2a36c2527afb2943476d091f37f64f422.tar.gz",
     "css-loader": "6.11.0",
     "style-loader": "3.3.4",
     "webpack": "5.110.1"
