@@ -50,6 +50,11 @@ function packedConsumer(work) {
   ]) {
     assert.ok(consumer_require.resolve(specifier).startsWith(path.join(consumer, "node_modules") + path.sep), specifier);
   }
+  const runtime_manifest = consumer_require("@drumee/ui-runtime/package.json");
+  const window_manager_manifest = consumer_require("@drumee/window-manager/package.json");
+  assert.equal(runtime_manifest.version, "0.1.0-alpha.2");
+  assert.equal(window_manager_manifest.version, "0.1.0-alpha.2");
+  assert.equal(window_manager_manifest.peerDependencies["@drumee/ui-runtime"], ">=0.1.0-alpha.2 <0.2.0");
   return consumer;
 }
 
